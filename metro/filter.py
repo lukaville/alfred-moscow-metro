@@ -3,7 +3,7 @@ from typing import Dict, List
 from metro.route_sorter import sort_routes
 
 
-def check_for_direct_route():
+def check_for_direct_route(args):
     def route_filter(routes):
         routes = sort_routes(routes, 'transferTime')
         if routes[0].get_metrics()['transfers'] == 0:
@@ -14,11 +14,11 @@ def check_for_direct_route():
     return route_filter
 
 
-def fastest_routes():
-    return lambda routes: sort_routes(routes, "timeTransfers")
+def fastest_routes(args):
+    return lambda routes: sort_routes(routes, 'timeTransfers')
 
 
-def remove_double_transfer_routes():
+def remove_double_transfer_routes(args):
     def route_filter(routes):
         return routes
 
@@ -40,7 +40,7 @@ class Filter(object):
         self.filters = []
         for filter_config in filter_configs:
             self.filters.append(
-                FILTERS[filter_config['name']](filter_config['args'])
+                FILTERS[filter_config['name']](filter_config.get('args'))
             )
 
     def process(self, routes):

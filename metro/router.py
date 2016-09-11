@@ -1,16 +1,18 @@
 # Ported to Python from
 # https://yastatic.net/metro/2.3.53/build/index/_index.ru.js
 import copy
-from typing import Dict
+
+import math
 
 from metro.filter import Filter
 from metro.route import Route
 from metro.station import Station
 
+INFINITY = math.inf
+
 
 class Router(object):
-    def __init__(self, scheme_metadata: Dict):
-        self.scheme_metadata = scheme_metadata
+    def __init__(self):
         self.transfer_tolerance_count = 1
         self.hop_tolerance_ratio = 2
         self.time_tolerance_ratio = 2
@@ -28,24 +30,29 @@ class Router(object):
             }
         }]
 
-        self._optimal = {'time': 1 / 0}
-        self._limit = {'time': 1 / 0, 'transfers': 0, 'hops': 0}
+        self._optimal = {'time': INFINITY}
+        self._limit = {'time': INFINITY, 'transfers': 0, 'hops': 0}
         self._curr_route_id = 0
         self._filter = Filter(self.filter_config)
 
     def reset_limits(self):
-        self._optimal.time = 1 / 0,
-        self._optimal.transfers = self.line_graph_max_depth + self.transfer_tolerance_count,
-        self._optimal.hops = 1 / 0,
-        self._limit.time = 1 / 0,
-        self._limit.transfers = self.line_graph_max_depth + self.transfer_tolerance_count,
-        self._limit.hops = 1 / 0
+        self._optimal['time'] = INFINITY,
+        self._optimal['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count,
+        self._optimal['hops'] = INFINITY,
+        self._limit['time'] = INFINITY,
+        self._limit['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count,
+        self._limit['hops'] = INFINITY
 
     def is_within_limits(self, metrics):
-        return metrics['transfers'] <= self._limit['transfers'] and metrics['time'] <= self._optimal['time'] or metrics['transfers'] <= self._optimal['transfers'] and metrics['time'] <= self._limit['time'] or metrics['transfers'] <= self._limit['transfers'] and metrics['hops'] <= self._optimal['hops']
+        return metrics['transfers'] <= self._limit['transfers'] and \
+               metrics['time'] <= self._optimal['time'] or \
+               metrics['transfers'] <= self._optimal['transfers'] and \
+               metrics['time'] <= self._limit['time'] or \
+               metrics['transfers'] <= self._limit['transfers'] and \
+               metrics['hops'] <= self._optimal['hops']
 
     def update_limits(self, metrics):
-        if metrics.transfers < self._optimal['transfers']:
+        if metrics['transfers'] < self._optimal['transfers']:
             self._optimal['transfers'] = metrics['transfers']
 
         if self._optimal['transfers'] == 0:
