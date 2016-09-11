@@ -68,4 +68,4 @@ class Route(object):
         return route
 
     def __str__(self):
-        return " → ".join([station.__str__() for station in self._stations])
+        return str(self._metrics['time']) + " sec.: " + " → ".join([station.__str__() for station in self._stations])

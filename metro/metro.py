@@ -36,12 +36,9 @@ class Metro(object):
     def get_stations(self):
         return self.stations.values()
 
-    def find_station(self, name):
+    def find_stations(self, name):
         stations = self.stations.values()
-        try:
-            return next(station for station in stations if name.lower() in station.name.lower())
-        except StopIteration:
-            return None
+        return [station for station in stations if station.name.lower().startswith(name.lower())]
 
     def find_routes(self, station_from: Station, station_to: Station):
         return self.router.find_routes(station_from, station_to)
