@@ -3,6 +3,34 @@ from typing import List
 from metro.route import Route
 
 
+def cmp_to_key(mycmp):
+    """Convert a cmp= function into a key= function"""
+
+    class K(object):
+        def __init__(self, obj, *args):
+            self.obj = obj
+
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+
+    return K
+
+
 def _cmp_transfers_time(x: Route, y: Route):
     transfers_result = x.get_metrics()['transfers'] - y.get_metrics()['transfers']
     if transfers_result != 0:
@@ -45,4 +73,4 @@ def sort_routes(routes: List[Route], param):
         'timeTransfers': _cmp_time_transfers,
         'roundedTimeTransfers': _cmp_rounded_time_transfers
     }[param]
-    return sorted(routes, cmp=sort_cmp)
+    return sorted(routes, key=cmp_to_key(sort_cmp))

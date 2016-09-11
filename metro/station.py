@@ -26,5 +26,5 @@ class Station(object):
     def set_links(self, links):
         self.links = links
 
-    def is_fully_closed(self):
-        return self.is_fully_closed
+    def __str__(self):
+        return self.name

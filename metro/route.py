@@ -1,3 +1,5 @@
+import copy
+
 from metro.link import Link
 from metro.station import Station
 
@@ -9,11 +11,11 @@ class Route(object):
             'transfers': 0,
             'hops': 0
         }
+        self.id = None
         self._stations = []
         self._links = []
         self._station_ids = []
         self._sealed = False
-        self._id = -1
 
     def is_sealed(self):
         return self._sealed
@@ -38,10 +40,10 @@ class Route(object):
 
     def set_id(self, route_id):
         if not self.is_sealed():
-            self._id = route_id
+            self.id = route_id
 
     def get_id(self):
-        return self._id
+        return self.id
 
     def get_stations(self):
         return self._stations
@@ -54,3 +56,16 @@ class Route(object):
 
     def unseal(self):
         self._sealed = False
+
+    def clone(self):
+        route = Route()
+        route._metrics = copy.copy(self.get_metrics())
+        route._stations = list(self._stations)
+        route._station_ids = list(self._station_ids)
+        route._sealed = self._sealed
+        route.id = self.id
+        route._links = list(self._links)
+        return route
+
+    def __str__(self):
+        return " → ".join([station.__str__() for station in self._stations])

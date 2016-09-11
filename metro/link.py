@@ -38,3 +38,6 @@ class Link(object):
 
     def get_weight_transfers(self):
         return self.weight_transfer
+
+    def __str__(self):
+        return self.from_station.__str__() + " → " + self.to_station.__str__()

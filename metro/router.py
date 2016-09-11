@@ -1,14 +1,11 @@
 # Ported to Python from
 # https://yastatic.net/metro/2.3.53/build/index/_index.ru.js
 import copy
-
 import math
 
 from metro.filter import Filter
 from metro.route import Route
 from metro.station import Station
-
-INFINITY = math.inf
 
 
 class Router(object):
@@ -30,18 +27,18 @@ class Router(object):
             }
         }]
 
-        self._optimal = {'time': INFINITY}
-        self._limit = {'time': INFINITY, 'transfers': 0, 'hops': 0}
+        self._optimal = {'time': math.inf}
+        self._limit = {'time': math.inf, 'transfers': 0, 'hops': 0}
         self._curr_route_id = 0
         self._filter = Filter(self.filter_config)
 
     def reset_limits(self):
-        self._optimal['time'] = INFINITY,
-        self._optimal['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count,
-        self._optimal['hops'] = INFINITY,
-        self._limit['time'] = INFINITY,
-        self._limit['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count,
-        self._limit['hops'] = INFINITY
+        self._optimal['time'] = math.inf
+        self._optimal['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count
+        self._optimal['hops'] = math.inf
+        self._limit['time'] = math.inf
+        self._limit['transfers'] = self.line_graph_max_depth + self.transfer_tolerance_count
+        self._limit['hops'] = math.inf
 
     def is_within_limits(self, metrics):
         return metrics['transfers'] <= self._limit['transfers'] and \
@@ -82,17 +79,18 @@ class Router(object):
             else:
                 for link in station_from.links:
                     opposite = link.get_opposite_station(station_from)
-                    if not (opposite.is_fully_closed() or route.is_station_visited(opposite)):
-                        r = copy.deepcopy(route)
-                        r.go_through_link(link)
+                    if not (opposite.is_fully_closed or route.is_station_visited(opposite)):
+                        cloned_route = route.clone()
+                        cloned_route.go_through_link(link)
 
-                        result = self.recursive_routing_call(opposite, station_to, r)
+                        result = self.recursive_routing_call(opposite, station_to, cloned_route)
                         if len(result) > 0:
                             routes += result
         return routes
 
     def find_routes(self, station_from: Station, station_to: Station):
         self.reset_limits()
-        return self._filter.process(self.recursive_routing_call(
+        results = self.recursive_routing_call(
             station_from, station_to
-        ))
+        )
+        return self._filter.process(results)

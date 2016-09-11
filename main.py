@@ -14,7 +14,10 @@ def calculate():
         metro = Metro(json.loads(scheme_metadata))
         from_station = metro.find_station('изм')
         to_station = metro.find_station('аэропорт')
-        print(metro.find_routes(from_station, to_station))
+
+        routes = metro.find_routes(from_station, to_station)
+        for route in routes:
+            print(route.__str__())
 
 
 if __name__ == '__main__':
