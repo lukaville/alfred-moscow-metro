@@ -67,5 +67,11 @@ class Route(object):
         route._links = list(self._links)
         return route
 
+    def get_from_station(self):
+        return self._stations[0]
+
+    def get_to_station(self):
+        return self._stations[-1]
+
     def __str__(self):
         return str(self._metrics['time']) + " sec.: " + " → ".join([station.__str__() for station in self._stations])

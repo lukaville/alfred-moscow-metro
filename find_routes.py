@@ -1,11 +1,12 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 import codecs
+import datetime
 import json
 import sys
+import humanize
 
-import math
-
+from alfred.alfred import WorkFlowOptions
 from metro.metro import Metro
 
 SCHEME_METADATA_FILENAME = 'scheme-metadata.json'
@@ -25,17 +26,23 @@ def find_routes(route_to):
         return result_routes
 
 
+def route_to_option(route):
+    human_time = humanize.naturaldelta(datetime.timedelta(seconds=route.get_metrics()['time']))
+    url = 'https://metro.yandex.ru/moscow?from={}&to={}&route=0'
+
+    return {
+        'title': route.get_from_station().name + ' → ' + route.get_to_station().name,
+        'subtitle': human_time,
+        'arg': url.format(route.get_from_station().id, route.get_to_station().id)
+    }
+
+
 if __name__ == '__main__':
     routes = find_routes(sys.argv[1])
 
-    result = {
-        'items': []
-    }
+    options = WorkFlowOptions()
 
     for route in routes:
-        result['items'].append({
-            'title': route.get_stations()[0].name + ' → ' + route.get_stations()[-1].name,
-            'subtitle': str(math.ceil(route._metrics['time'] / 60)) + ' мин.'
-        })
+        options.add_option(route_to_option(route))
 
-    print(json.dumps(result))
+    options.print()
